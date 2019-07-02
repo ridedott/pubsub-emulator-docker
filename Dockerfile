@@ -1,6 +1,6 @@
 FROM google/cloud-sdk:alpine
 
-ENV PORT=8080
+ENV PORT=8081
 
 RUN apk --no-cache add openjdk8-jre
 
