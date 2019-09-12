@@ -14,4 +14,11 @@ jobs:
         with:
           fetch-depth: 1
       - name: Build
-        run: docker build .
+        run: |
+          docker build \
+            --tag pubsub-emulator \
+            --build-arg CLOUD_FIRESTORE_EMULATOR_VERSION=$VERSION \
+            .
+          VERSION=$(docker run pubsub-emulator gcloud components list --filter pubsub-emulator --show-versions --format="value(latest_version_string)" | tail -1)
+          echo $VERSION
+
