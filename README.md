@@ -40,5 +40,10 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Versioning
 
-This project adheres to [Semantic Versioning](http://semver.org) v2.
+This project reflects Google's pubsub-emulator gcloud component versioning. Using the `gcloud`
+CLI utility, the current pubsub-emulator version can be obtained by running the followin command:
+
+```bash
+gcloud components list --filter pubsub-emulator --format="value(latest_version_string)"
+```
 
