@@ -15,9 +15,10 @@ jobs:
           fetch-depth: 1
       - name: Build
         run: |
-          docker build \
-            --tag docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest \
-            .
+          docker build --tag image .
+          VERSION=$(docker run image gcloud components list --filter pubsub-emulator --show-versions --format="value(latest_version_string)" | tail -1)
+          docker tag image docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
+          docker tag image docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION
       - name: Release
         env:
           GITHUB_REGISTRY_USERNAME: ${{ secrets.GITHUB_REGISTRY_USERNAME }}
@@ -26,3 +27,5 @@ jobs:
           echo $GITHUB_REGISTRY_PASSWORD | docker login docker.pkg.github.com --username $GITHUB_REGISTRY_USERNAME --password-stdin
           docker push \
             docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
+          docker push \
+            docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION
