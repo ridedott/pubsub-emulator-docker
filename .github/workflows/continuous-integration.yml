@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -14,18 +14,4 @@ jobs:
         with:
           fetch-depth: 1
       - name: Build
-        env:
-          IMAGE_NAME: docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator
-        run: |
-          docker build --tag $IMAGE_NAME .
-      - name: Release
-        env:
-          IMAGE_NAME: docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator
-          GITHUB_REGISTRY_USERNAME: ${{ secrets.GITHUB_REGISTRY_USERNAME }}
-          GITHUB_REGISTRY_PASSWORD: ${{ secrets.GITHUB_REGISTRY_PASSWORD }}
-        run: |
-          VERSION=`docker run $IMAGE_NAME gcloud components list --filter pubsub-emulator --format="value(latest_version_string)" |& tail -n 1`
-          docker tag image $IMAGE_NAME:$VERSION
-          echo $GITHUB_REGISTRY_PASSWORD | docker login docker.pkg.github.com --username $GITHUB_REGISTRY_USERNAME --password-stdin
-          docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:$VERSION
+        run: docker build .
