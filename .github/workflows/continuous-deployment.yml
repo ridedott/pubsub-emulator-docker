@@ -14,18 +14,27 @@ jobs:
         with:
           fetch-depth: 1
       - name: Build
-        env:
-          IMAGE_NAME: docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator
         run: |
-          docker build --tag $IMAGE_NAME .
+          docker build --tag pubsub-emulator .
       - name: Release
         env:
-          IMAGE_NAME: docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator
           GITHUB_REGISTRY_USERNAME: ${{ secrets.GITHUB_REGISTRY_USERNAME }}
           GITHUB_REGISTRY_PASSWORD: ${{ secrets.GITHUB_REGISTRY_PASSWORD }}
+          DOCKER_HUB_REGISTRY_USERNAME:
+            ${{ secrets.DOCKER_HUB_REGISTRY_USERNAME }}
+          DOCKER_HUB_REGISTRY_PASSWORD:
+            ${{ secrets.DOCKER_HUB_REGISTRY_PASSWORD }}
         run: |
-          VERSION=`docker run $IMAGE_NAME gcloud components list --filter pubsub-emulator --format="value(latest_version_string)" |& tail -n 1`
-          docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
+          VERSION=`docker run pubsub-emulator gcloud components list --filter pubsub-emulator --format="value(latest_version_string)" |& tail -n 1`
+          # GitHub Package Registry
           echo $GITHUB_REGISTRY_PASSWORD | docker login docker.pkg.github.com --username $GITHUB_REGISTRY_USERNAME --password-stdin
-          docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:$VERSION
+          docker tag pubsub-emulator docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
+          docker tag pubsub-emulator docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION
+          docker push docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
+          docker push docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION
+          # Docker Hub
+          echo $DOCKER_HUB_REGISTRY_PASSWORD | docker login registry.hub.docker.com --username $DOCKER_HUB_REGISTRY_USERNAME --password-stdin
+          docker tag pubsub-emulator registry.hub.docker.com/ridedott/pubsub-emulator:latest
+          docker tag pubsub-emulator registry.hub.docker.com/ridedott/pubsub-emulator:$VERSION
+          docker push registry.hub.docker.com/ridedott/pubsub-emulator:latest
+          docker push registry.hub.docker.com/ridedott/pubsub-emulator:$VERSION
