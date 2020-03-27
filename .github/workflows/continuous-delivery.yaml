@@ -1,0 +1,46 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Build
+        run: |
+          VERSION=`cat ./VERSION`
+          docker build \
+            --build-arg VERSION=$VERSION \
+            --tag docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest \
+            --tag docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION \
+            --tag registry.hub.docker.com/ridedott/pubsub-emulator:latest \
+            --tag registry.hub.docker.com/ridedott/pubsub-emulator:$VERSION \
+            .
+      - env:
+          GITHUB_REGISTRY_USERNAME: ${{ github.actor }}
+          GITHUB_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_HUB_REGISTRY_USERNAME: ${{ secrets.DOCKER_HUB_REGISTRY_USERNAME }}
+          DOCKER_HUB_REGISTRY_PASSWORD: ${{ secrets.DOCKER_HUB_REGISTRY_PASSWORD }}
+        name: Release
+        run: |
+          VERSION=`cat ./VERSION`
+          # GitHub Package Registry
+          echo $GITHUB_REGISTRY_PASSWORD | docker login docker.pkg.github.com --username $GITHUB_REGISTRY_USERNAME --password-stdin
+          docker push \
+            docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
+          docker push \
+            docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION
+          # Docker Hub
+          echo $DOCKER_HUB_REGISTRY_PASSWORD | docker login registry.hub.docker.com --username $DOCKER_HUB_REGISTRY_USERNAME --password-stdin
+          docker push \
+            registry.hub.docker.com/ridedott/pubsub-emulator:latest
+          docker push \
+            registry.hub.docker.com/ridedott/pubsub-emulator:$VERSION
