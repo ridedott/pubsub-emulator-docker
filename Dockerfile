@@ -1,11 +1,20 @@
-FROM google/cloud-sdk:alpine
+FROM debian:buster-slim as build
 
-RUN apk --no-cache add openjdk8-jre
+ARG VERSION
 
-RUN gcloud components install --quiet beta pubsub-emulator
+ADD https://storage.googleapis.com/firebase-preview-drop/emulator/pubsub-emulator-${VERSION}.zip /emulator.zip
+
+RUN apt-get --quiet update && \
+  apt-get --quiet install --assume-yes --no-install-recommends unzip && \
+  mkdir /emulator && \
+  unzip /emulator.zip -d /emulator
+
+FROM openjdk:14-slim
+
+COPY --from=build /emulator/pubsub-emulator/lib /emulator
 
 ENV PORT=8081
 
-CMD [ "sh", "-c", "gcloud beta emulators pubsub start --host-port=0.0.0.0:${PORT} --log-http --user-output-enabled --verbosity=debug" ]
+CMD ["sh", "-c", "java -jar /emulator/cloud-pubsub-emulator-0.1-SNAPSHOT-all.jar --host=0.0.0.0 --port=${PORT}"]
 
 EXPOSE ${PORT}

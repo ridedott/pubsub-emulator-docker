@@ -1,0 +1,22 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Build
+        run: |
+          VERSION=`cat ./VERSION`
+          docker build \
+            --build-arg VERSION=$VERSION \
+            .
