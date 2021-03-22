@@ -9,7 +9,7 @@ RUN apt-get --quiet update && \
   mkdir /emulator && \
   unzip /emulator.zip -d /emulator
 
-FROM openjdk:15-slim
+FROM openjdk:16-slim
 
 COPY --from=build /emulator/pubsub-emulator/lib /emulator
 
