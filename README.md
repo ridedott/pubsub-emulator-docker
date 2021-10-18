@@ -11,7 +11,7 @@ docker pull ghcr.io/ridedott/pubsub-emulator:latest
 docker run ridedott/pubsub-emulator:latest
 ```
 
-### Docker Hub
+### From Docker Hub
 
 ```bash
 docker pull ridedott/pubsub-emulator:latest
