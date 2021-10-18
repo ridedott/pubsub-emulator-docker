@@ -4,8 +4,17 @@ A Docker image running the GCP PubSub Emulator.
 
 ## Usage
 
+### From GitHub Packages Registry
+
 ```bash
-docker pull docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
+docker pull ghcr.io/ridedott/pubsub-emulator:latest
+docker run ridedott/pubsub-emulator:latest
+```
+
+### Docker Hub
+
+```bash
+docker pull ridedott/pubsub-emulator:latest
 docker run ridedott/pubsub-emulator:latest
 ```
 
