@@ -34,7 +34,7 @@ jobs:
 
           VERSION=`cat ./VERSION`
           docker buildx build \
-            --build-arg CLOUD_PUBSUB_EMULATOR_VERSION=$VERSION \
+            --build-arg VERSION=$VERSION \
             --output=type=registry \
             --platform linux/amd64,linux/arm64 \
             --tag ghcr.io/ridedott/pubsub-emulator:latest \
