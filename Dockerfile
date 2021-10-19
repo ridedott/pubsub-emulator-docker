@@ -1,4 +1,4 @@
-FROM debian:buster-slim as build
+FROM debian:bullseye-slim as build
 
 ARG VERSION
 
@@ -9,7 +9,7 @@ RUN apt-get --quiet update && \
   mkdir /emulator && \
   unzip /emulator.zip -d /emulator
 
-FROM openjdk:18-slim
+FROM openjdk:18-slim-bullseye
 
 COPY --from=build /emulator/pubsub-emulator/lib /emulator
 

@@ -14,33 +14,35 @@ jobs:
         uses: actions/checkout@v2
         with:
           persist-credentials: false
-      - name: Build
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: arm64
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - env:
+          DOCKER_BUILDKIT: 1
+          DOCKER_HUB_REGISTRY_USERNAME:
+            ${{ secrets.DOCKER_HUB_REGISTRY_USERNAME }}
+          DOCKER_HUB_REGISTRY_PASSWORD:
+            ${{ secrets.DOCKER_HUB_REGISTRY_PASSWORD }}
+          GITHUB_REGISTRY_USERNAME: ${{ github.actor }}
+          GITHUB_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        name: Build and release
         run: |
+          # GitHub Packages Registry
+          echo $GITHUB_REGISTRY_PASSWORD | docker login ghcr.io --username $GITHUB_REGISTRY_USERNAME --password-stdin
+
+          # Docker Hub
+          echo $DOCKER_HUB_REGISTRY_PASSWORD | docker login registry.hub.docker.com --username $DOCKER_HUB_REGISTRY_USERNAME --password-stdin
+
           VERSION=`cat ./VERSION`
-          docker build \
+          docker buildx build \
             --build-arg VERSION=$VERSION \
-            --tag docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest \
-            --tag docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION \
+            --output=type=registry \
+            --platform linux/amd64,linux/arm64 \
+            --tag ghcr.io/ridedott/pubsub-emulator:latest \
+            --tag ghcr.io/ridedott/pubsub-emulator:$VERSION \
             --tag registry.hub.docker.com/ridedott/pubsub-emulator:latest \
             --tag registry.hub.docker.com/ridedott/pubsub-emulator:$VERSION \
             .
-      - env:
-          GITHUB_REGISTRY_USERNAME: ${{ github.actor }}
-          GITHUB_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN_DOTTBOTT }}
-          DOCKER_HUB_REGISTRY_USERNAME: ${{ secrets.DOCKER_HUB_REGISTRY_USERNAME }}
-          DOCKER_HUB_REGISTRY_PASSWORD: ${{ secrets.DOCKER_HUB_REGISTRY_PASSWORD }}
-        name: Release
-        run: |
-          VERSION=`cat ./VERSION`
-          # GitHub Package Registry
-          echo $GITHUB_REGISTRY_PASSWORD | docker login docker.pkg.github.com --username $GITHUB_REGISTRY_USERNAME --password-stdin
-          docker push \
-            docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:latest
-          docker push \
-            docker.pkg.github.com/ridedott/pubsub-emulator-docker/pubsub-emulator:$VERSION
-          # Docker Hub
-          echo $DOCKER_HUB_REGISTRY_PASSWORD | docker login registry.hub.docker.com --username $DOCKER_HUB_REGISTRY_USERNAME --password-stdin
-          docker push \
-            registry.hub.docker.com/ridedott/pubsub-emulator:latest
-          docker push \
-            registry.hub.docker.com/ridedott/pubsub-emulator:$VERSION
