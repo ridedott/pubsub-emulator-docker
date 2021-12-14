@@ -9,7 +9,7 @@ RUN apt-get --quiet update && \
   mkdir /emulator && \
   unzip /emulator.zip -d /emulator
 
-FROM openjdk:18-slim-bullseye
+FROM openjdk:19-slim-bullseye
 
 COPY --from=build /emulator/pubsub-emulator/lib /emulator
 
