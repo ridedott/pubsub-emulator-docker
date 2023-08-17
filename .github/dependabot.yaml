@@ -8,7 +8,6 @@ updates:
     directory: /
     open-pull-requests-limit: 99
     package-ecosystem: docker
-    reviewers: []
     schedule:
       interval: daily
   - allow:
@@ -19,6 +18,5 @@ updates:
     directory: /
     open-pull-requests-limit: 99
     package-ecosystem: github-actions
-    reviewers: []
     schedule:
       interval: daily
